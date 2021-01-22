@@ -2,7 +2,6 @@
 # Create Windows VM
 - name: "PLAYBOOK: Azure VM create"
   import_playbook: inc/azure/azure_vm_create.yaml
-  
 
 # Install / update Visual Studio
 - name: "PLAYBOOK: Install / Update Visual Studio"
