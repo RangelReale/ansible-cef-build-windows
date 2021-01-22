@@ -1,0 +1,27 @@
+---
+# Create VM
+- hosts: localhost
+  any_errors_fatal: true
+  connection: local
+  tasks:
+  - include_vars: azure_vars.yaml
+  - name: "Check required variables"
+    fail: msg="Variable '{{ item }}' is not defined"
+    when: item not in vars
+    with_items: "{{azure_required_vars}}"
+  - debug:
+      msg: "azure_vm_size_setup: {{ azure_vm_size_setup }}"
+  - debug:
+      msg: "azure_vm_size_build: {{ azure_vm_size_build }}"
+  - name: Create VM
+    import_tasks: helpers/vm_create.yaml
+  - name: Enable winrm
+    import_tasks: helpers/vm_winrm.yaml
+
+# Format and mount data disk
+- hosts: build_vm
+  tasks:
+  - name: Configure Windows
+    include_tasks: helpers/vm_config.yaml
+  - name: Configure data disk
+    include_tasks: helpers/vm_datadisk.yaml

@@ -1,0 +1,10 @@
+- name: Load azure auth
+  set_fact:
+    az_subscription_id: "{{ lookup('ini',  'subscription_id section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"
+    az_client_id: "{{ lookup('ini',  'client_id section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"
+    az_tenant_id: "{{ lookup('ini',  'tenant section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"
+    az_secret: "{{ lookup('ini',  'secret section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"  
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  with_items: "{{ groups['all'] }}"
+  when: item != "localhost"    

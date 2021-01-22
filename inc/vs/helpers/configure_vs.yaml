@@ -1,0 +1,6 @@
+---
+- name: Update Vs{{ vs_version }}
+  win_shell: Start-Process -Wait -FilePath  "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" -ArgumentList "update --passive --norestart --installpath ""C:\Program Files (x86)\Microsoft Visual Studio\{{ vs_version }}\{{ vs_edition }}"""
+
+- name: Add Vs{{ vs_version }} deps
+  win_shell: Start-Process -Wait -FilePath  "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" -ArgumentList "modify --passive --norestart --installpath ""C:\Program Files (x86)\Microsoft Visual Studio\{{ vs_version }}\{{ vs_edition}}"" --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended"

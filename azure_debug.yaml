@@ -1,0 +1,108 @@
+############# DEBUG 1  ###################
+# - hosts: localhost
+#   connection: local
+#   tasks:
+#   - include_vars: inc/azure/azure_vars.yaml
+#   - name: Restart VM for distrub
+#     import_tasks: inc/azure/helpers/vm_restart_distrib.yaml
+# #   - set_fact:
+# #       az_subscription_id: "{{ lookup('ini',  'subscription_id section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"
+# #       az_client_id: "{{ lookup('ini',  'client_id section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"
+# #       az_tenant_id: "{{ lookup('ini',  'tenant section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"
+# #       az_secret: "{{ lookup('ini',  'secret section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"  
+# #     delegate_to: "{{ item }}"
+# #     delegate_facts: True
+# #     with_items: "{{ groups['all'] }}"
+# #     when: item != "localhost"    
+
+# - hosts: all
+#   tasks:
+#   # - debug:  
+#   #     msg: "{{ az_client_id }} -- {{ az_tenant_id }} -- {{ az_secret }}"
+#   - name: Build CEF distrib vars
+#     include_vars: inc/cef/cef_vars.yaml
+#   - name: Build CEF distrib
+#     include_tasks: inc/cef/helpers/cefdistrib.yaml
+
+#   # - name: Install package dependencies
+#   #   win_chocolatey:
+#   #     name:
+#   #       - chocolatey-core.extension
+#   #       - chocolatey-windowsupdate.extension
+#   #     state: present
+
+#   # - name: Install Azure Cli
+#   #   win_chocolatey:
+#   #     name: azure-cli
+
+#   # - name: Azure login
+#   #   win_shell: az login --service-principal --username {{ az_client_id }} --password {{ az_secret }} --tenant {{ az_tenant_id }}
+
+############# DEBUG 2  ###################
+- hosts: localhost
+  connection: local
+  tasks:
+  # - include_vars: inc/azure/azure_vars.yaml
+  # - name: Restart VM for distrub
+  #   import_tasks: inc/azure/helpers/vm_restart_distrib.yaml
+  - name: Load azure auth
+    set_fact:
+      az_subscription_id: "{{ lookup('ini',  'subscription_id section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"
+      az_client_id: "{{ lookup('ini',  'client_id section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"
+      az_tenant_id: "{{ lookup('ini',  'tenant section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"
+      az_secret: "{{ lookup('ini',  'secret section=default  file={{ ansible_env.HOME }}/.azure/credentials') }}"  
+    delegate_to: "{{ item }}"
+    delegate_facts: True
+    with_items: "{{ groups['all'] }}"
+    when: item != "localhost"    
+  - name: create storage account
+    azure_rm_storageaccount:
+      resource_group: rg-cefbuild
+      name: sacsweb01
+      account_type: Standard_LRS
+      access_tier: Hot
+      kind: BlobStorage
+  - name: Create blob container
+    azure_rm_storageblob:
+      resource_group: rg-cefbuild
+      storage_account_name: sacsweb01
+      container: fl-cs-web01
+- hosts: all
+  tasks:
+  - debug:  
+      msg: "{{ az_client_id }} -- {{ az_tenant_id }} -- {{ az_secret }}"
+  # - name: Build CEF distrib vars
+  #   include_vars: inc/cef/cef_vars.yaml
+  # - name: Build CEF distrib
+  #   include_tasks: inc/cef/helpers/cefdistrib.yaml
+
+  - name: Install package dependencies
+    win_chocolatey:
+      name:
+        - chocolatey-core.extension
+        - chocolatey-windowsupdate.extension
+      state: present
+
+  - name: Install Azure Cli
+    win_chocolatey:
+      name: azure-cli
+
+  - name: Azure login
+    win_shell: az login --service-principal --username {{ az_client_id }} --password {{ az_secret }} --tenant {{ az_tenant_id }}
+
+  - name: Downloading binary files
+    block:
+    - name: Locating binary distrib files
+      win_find: 
+        paths: m:\code\chromium_git\chromium\src\cef\binary_distrib
+        recurse: no 
+        patterns: "*.zip"
+      register: binary_distrib_files
+
+    - ansible.builtin.debug: 
+        msg: 'filename: {{ item.filename }} -- path: {{ item.path }}'
+      with_items: "{{ binary_distrib_files.files }}"
+
+    - name: Uploading binary distrib files
+      win_shell: az storage blob upload --file {{ item.path }} --container-name fl-cs-web01 --name {{ item.filename }} --account-name sacsweb01
+      with_items: "{{ binary_distrib_files.files }}"

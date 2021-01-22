@@ -1,0 +1,38 @@
+---
+azure_location: "eastus"
+image_has_visualstudio: true
+vs_edition: "Community"
+# vs_version: "2019"
+azure_upload_distrib_blob: true
+
+## Standard SSD
+# azure_vm_size_setup: "Standard_D2_v2"
+# azure_vm_size_build: "Standard_D4_v2"
+# azure_vm_size_build: "Standard_D8_v3"
+# azure_vm_size_build: "Standard_D64_v3"
+# azure_managed_disk_type: "StandardSSD_LRS"
+
+## Premium SSD
+azure_vm_size_setup: "Standard_DS3_v2"
+azure_vm_size_build: "Standard_D64s_v3"
+azure_managed_disk_type: "Premium_LRS"
+
+admin_user: "cefuser"
+
+vmi_novs_offer: "WindowsServer"
+vmi_novs_publisher: "MicrosoftWindowsServer"
+vmi_novs_sku: "2019-Datacenter"
+
+vmi_vs2019_offer: "visualstudio2019latest"
+vmi_vs2019_publisher: "MicrosoftVisualStudio"
+vmi_vs2019_sku: "vs-2019-comm-latest-ws2019"
+
+vmi_vs2017_offer: "visualstudio"
+vmi_vs2017_publisher: "MicrosoftVisualStudio"
+vmi_vs2017_sku: "VS-2017-Comm-Latest-WS2016"
+
+vmi_version: "latest"
+
+azure_required_vars:
+- admin_password
+- vs_version

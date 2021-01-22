@@ -1,0 +1,19 @@
+- name: Get disk facts
+  win_disk_facts:
+
+#- debug:
+#    msg: "Disk fact: {{ (ansible_disks | selectattr('partition_count', 'equalto', 0) | list) }}"
+
+- name: Format and mount partition
+  include_tasks: vm_datadisk_format.yaml
+  # vars:
+  #   disk_format: "{{ disk_format }}"
+  with_items: "{{ (ansible_disks | selectattr('partition_count', 'equalto', 0) | list) }}"
+  loop_control:
+    loop_var: disk_format
+
+- name: Create a file
+  ansible.windows.win_copy:
+    dest: m:\cefbuild.txt
+    content: |
+      This disk will be used to build CEF.

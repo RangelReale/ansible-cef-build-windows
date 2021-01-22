@@ -1,0 +1,21 @@
+- name: Uninstall Windows Defender
+  ansible.windows.win_feature:
+    name: Windows-Defender
+    state: absent
+  register: win_feature_wd
+  changed_when: win_feature_wd.reboot_required  
+
+- name: Reboot if uninstalling Windows-Defender feature requires it
+  ansible.windows.win_reboot:
+  when: win_feature_wd.reboot_required
+
+# - name: Install package dependencies
+#   win_chocolatey:
+#     name:
+#       - chocolatey-core.extension
+#       - chocolatey-windowsupdate.extension
+#     state: present
+
+# - name: Install Azure Cli
+#   win_chocolatey:
+#     name: azure-cli

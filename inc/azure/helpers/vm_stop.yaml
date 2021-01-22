@@ -1,0 +1,7 @@
+---
+- name: Stop VM
+  azure_rm_virtualmachine:
+    resource_group: rg-cefbuild
+    name: vm-cs-web01
+    vm_size: "{{ azure_vm_size_setup }}" # Change back vm size to setup size
+    started: false

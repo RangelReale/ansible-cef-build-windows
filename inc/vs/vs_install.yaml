@@ -1,0 +1,5 @@
+- name: Install Visual Studio {{ vs_version }}
+  import_tasks: helpers/install_vs.yaml
+
+- name: Install Windows 10 SDK
+  import_tasks: helpers/win10sdk.yaml

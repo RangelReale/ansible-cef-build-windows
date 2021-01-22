@@ -1,0 +1,6 @@
+---
+cef_build_debug: true
+cef_build_release: true
+cef_download_distrib: false
+cef_branch: 4324
+cef_gn_defines: "is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome"

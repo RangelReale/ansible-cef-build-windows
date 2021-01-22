@@ -1,0 +1,11 @@
+- name: Download Windows 10 sdk
+  win_get_url:
+    url: https://download.microsoft.com/download/4/d/2/4d2b7011-606a-467e-99b4-99550bf24ffc/windowssdk/winsdksetup.exe
+    dest: '%TEMP%\winsdksetup.exe'
+
+- name: Install windows 10 sdk
+  win_shell: "%TEMP%\\winsdksetup.exe /Features OptionId.WindowsDesktopDebuggers OptionId.DesktopCPPx64 OptionId.DesktopCPPx86 OptionId.UWPManaged OptionId.UWPCPP /Quiet /NoRestart /Log %TEMP%\\winsdksetup.log"
+  args:
+      executable: cmd    
+  register: winsdksetup_exec
+  failed_when: winsdksetup_exec.rc != 0 and winsdksetup_exec.rc != 3010

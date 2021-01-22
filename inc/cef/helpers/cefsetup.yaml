@@ -1,0 +1,64 @@
+---
+- ansible.builtin.debug:
+    msg: 'Configuring CEF branch "{{ cef_branch }}"'
+
+- name: Create Directories
+  win_shell: |
+    New-Item -Force -Path m:\code\automate -ItemType Directory
+    New-Item -Force -Path m:\code\chromium_git -ItemType Directory
+    New-Item -Force -Path m:\code\depot_tools -ItemType Directory
+
+- name: Download depot tools
+  win_get_url:
+    url: https://storage.googleapis.com/chrome-infra/depot_tools.zip
+    dest: '%TEMP%\depot_tools.zip'
+
+- name: Install depot tools
+  community.windows.win_unzip:
+    src: '%TEMP%\depot_tools.zip'
+    dest: m:\code\depot_tools
+
+- name: Update depot tools
+  win_command: update_depot_tools.bat
+  args:
+    chdir: m:\code\depot_tools
+
+- name: Add depot_tools to path
+  ansible.windows.win_path:
+    elements:
+    - 'm:\code\depot_tools'
+
+- name: Download automate-git
+  win_get_url:
+    url: https://bitbucket.org/chromiumembedded/cef/raw/master/tools/automate/automate-git.py
+    dest: m:\code\automate\automate-git.py
+
+- name: Create update.bat
+  ansible.windows.win_copy:
+    dest: m:\code\chromium_git\update.bat
+    content: |
+      set CEF_USE_GN=1
+      set GN_DEFINES={{ cef_gn_defines }}
+      set GYP_MSVS_VERSION={{ vs_version }}
+      set GN_ARGUMENTS=--ide=vs{{ vs_version }} --sln=cef --filters=//cef/*
+      python ..\automate\automate-git.py --download-dir=m:\code\chromium_git --depot-tools-dir=m:\code\depot_tools --no-depot-tools-update --no-distrib --no-build --branch={{ cef_branch }}
+
+- name: Run update.bat
+  win_command: update.bat
+  args:
+    chdir: m:\code\chromium_git
+
+- name: Create create.bat
+  ansible.windows.win_copy:
+    dest: m:\code\chromium_git\chromium\src\cef\create.bat
+    content: |
+      set CEF_USE_GN=1
+      set GYP_MSVS_VERSION={{ vs_version }}
+      set GN_DEFINES={{ cef_gn_defines }}
+      set GN_ARGUMENTS=--ide=vs{{ vs_version }} --sln=cef --filters=//cef/*
+      call cef_create_projects.bat
+
+- name: Run create.bat
+  win_command: create.bat
+  args:
+    chdir: m:\code\chromium_git\chromium\src\cef

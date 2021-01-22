@@ -1,0 +1,6 @@
+# Setup CEF build
+- hosts: build_vm
+  tasks:
+  - include_vars: cef_vars.yaml
+  - name: Setup CEF build
+    include_tasks: helpers/cefsetup.yaml

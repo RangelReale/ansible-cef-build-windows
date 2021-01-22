@@ -1,0 +1,29 @@
+---
+# Create Windows VM
+- name: "PLAYBOOK: Azure VM create"
+  import_playbook: inc/azure/azure_vm_create.yaml
+  
+
+# Install / update Visual Studio
+- name: "PLAYBOOK: Install / Update Visual Studio"
+  import_playbook: inc/azure/azure_vs.yaml
+
+# Setup CEF compilation
+- name: "PLAYBOOK: Setup CEF compilation"
+  import_playbook: inc/cef/cef_setup.yaml
+
+# Switch to compile VM (possibly more powerful)
+- name: "PLAYBOOK: Switch to compile VM"
+  import_playbook: inc/azure/azure_vm_build.yaml
+
+# Build CEF
+- name: "PLAYBOOK: Build CEF"
+  import_playbook: inc/cef/cef_build.yaml
+
+# Upload CEF distrib to blob storage
+- name: "PLAYBOOK: Upload CEF to blob storage"
+  import_playbook: inc/azure/azure_distrib.yaml
+
+# Stop VM
+- name: "PLAYBOOK: Stop VM"
+  import_playbook: inc/azure/azure_vm_stop.yaml

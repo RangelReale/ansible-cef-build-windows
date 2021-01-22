@@ -1,0 +1,42 @@
+---
+- ansible.builtin.debug:
+    msg: 'Building CEF branch "{{ cef_branch }}"'
+
+- name: Build release
+  win_command: ninja -C out\Release_GN_x64 cef
+  args:
+    chdir: m:\code\chromium_git\chromium\src
+  when: cef_build_release | bool
+
+- name: Build debug
+  win_command: ninja -C out\Debug_GN_x64 cef
+  args:
+    chdir: m:\code\chromium_git\chromium\src
+  when: cef_build_debug | bool
+
+- name: Build distrib
+  win_command: make_distrib.bat --ninja-build --x64-build
+  args:
+    chdir: m:\code\chromium_git\chromium\src\cef\tools
+
+- name: Downloading binary files
+  block:
+  - name: Locating binary distrib files
+    win_find: 
+      paths: m:\code\chromium_git\chromium\src\cef\binary_distrib
+      recurse: no 
+      patterns: "*.zip"
+    register: binary_distrib_files
+
+  - ansible.builtin.debug: 
+      msg: 'filename: {{ item.filename }} -- path: {{ item.path }}'
+    with_items: "{{ binary_distrib_files.files }}"
+
+  - name: Downloading binary distrib files
+    fetch: 
+      flat: true
+      src: "{{ item.path }}"
+      dest: "./"
+    with_items: "{{ binary_distrib_files.files }}"
+
+  when: cef_download_distrib | bool

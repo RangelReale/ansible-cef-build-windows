@@ -1,0 +1,14 @@
+- hosts: build_vm
+  tasks:
+  - include_vars: ../vs/vs_vars.yaml
+
+  - debug:
+      msg: "Visual Studio version: {{ vs_edition }} {{ vs_version }}"
+
+  - name: Install Visual Studio
+    include_tasks: ../vs/vs_install.yaml
+    when: not image_has_visualstudio | bool
+
+  - name: Configure Visual Studio
+    include_tasks: ../vs/vs_configure.yaml
+    when: image_has_visualstudio | bool

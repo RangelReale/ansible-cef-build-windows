@@ -1,0 +1,31 @@
+---
+# Create Azure storage account
+- hosts: localhost
+  any_errors_fatal: true
+  connection: local
+  tasks:
+  - include_vars: azure_vars.yaml
+  - block:
+    - name: Load Azure auth
+      include_tasks: helpers/azure_auth.yaml
+    - name: create storage account
+      azure_rm_storageaccount:
+        resource_group: rg-cefbuild
+        name: sacsweb01
+        account_type: Standard_LRS
+        access_tier: Hot
+        kind: BlobStorage
+    - name: Create blob container
+      azure_rm_storageblob:
+        resource_group: rg-cefbuild
+        storage_account_name: sacsweb01
+        container: fl-cs-web01
+    when: azure_upload_distrib_blob | bool
+
+# Download binary distrib
+- hosts: build_vm
+  tasks:
+  - include_vars: azure_vars.yaml
+  - name: Upload binary distrib to blob storage
+    include_tasks: helpers/cefdistrib.yaml
+    when: azure_upload_distrib_blob | bool

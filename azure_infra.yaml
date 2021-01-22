@@ -1,0 +1,6 @@
+---
+- import_playbook: inc/azure/azure_vm_create.yaml
+
+- import_playbook: inc/azure/azure_vs.yaml
+
+#- import_playbook: inc/azure/azure_vm_build.yaml

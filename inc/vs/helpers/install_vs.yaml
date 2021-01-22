@@ -1,0 +1,18 @@
+- name: Download Visual Studio 2019 Community
+  win_get_url:
+    url: https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16
+    dest: '%TEMP%\vs_community.exe'
+  when: vs_version == '2019'
+
+- name: Download Visual Studio 2017 Community
+  win_get_url:
+    url: https://download.visualstudio.microsoft.com/download/pr/010d871e-3fa8-4004-b219-1c10bcaa71ad/a3ee8ecda3f9cc003dfe40db87eb56d38b21087116f51e243ab0455348f4b188/vs_Community.exe
+    dest: '%TEMP%\vs_community.exe'
+  when: vs_version == '2017'
+
+- name: Install Visual Studio {{ vs_version }} Community
+  win_shell: "%TEMP%\\vs_community.exe --add Microsoft.VisualStudio.Product.BuildTools --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended"
+  args:
+      executable: cmd    
+  register: vs_community_exec
+  failed_when: vs_community_exec.rc != 0 and vs_community_exec.rc != 3010

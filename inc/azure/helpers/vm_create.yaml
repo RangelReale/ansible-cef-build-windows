@@ -1,0 +1,129 @@
+---
+- name: Create resource group
+  azure_rm_resourcegroup:
+    name: rg-cefbuild
+    location: "{{ azure_location }}"
+
+- name: Create virtual network
+  azure_rm_virtualnetwork:
+    resource_group: rg-cefbuild
+    name: vnet-cs-web
+    address_prefixes: "10.0.0.0/16"
+
+- name: Add subnet
+  azure_rm_subnet:
+    resource_group: rg-cefbuild
+    name: snet-cs-web
+    address_prefix: "10.0.1.0/24"
+    virtual_network: vnet-cs-web
+
+- name: Create public IP address
+  azure_rm_publicipaddress:
+    resource_group: rg-cefbuild
+    allocation_method: Static
+    name: pip-cs-web
+  register: output_ip_address
+
+- name: Output public IP
+  debug:
+    msg: "The public IP is {{ output_ip_address.state.ip_address }}"
+
+- name: Create Network Security Group
+  azure_rm_securitygroup:
+    resource_group: rg-cefbuild
+    name: nsg-cs-web
+    rules:
+      - name: 'allow_rdp'
+        protocol: Tcp
+        destination_port_range: 3389
+        access: Allow
+        priority: 1001
+        direction: Inbound
+      - name: 'allow_web_traffic'
+        protocol: Tcp
+        destination_port_range:
+          - 80
+          - 443
+        access: Allow
+        priority: 1002
+        direction: Inbound
+      - name: 'allow_powershell_remoting'
+        protocol: Tcp
+        destination_port_range:
+          - 5985
+          - 5986
+        access: Allow
+        priority: 1003
+        direction: Inbound
+
+- name: Create a network interface
+  azure_rm_networkinterface:
+    name: nic-cs-web
+    resource_group: rg-cefbuild
+    virtual_network: vnet-cs-web
+    subnet_name: snet-cs-web
+    security_group: nsg-cs-web
+    ip_configurations:
+      - name: default
+        public_ip_address_name: pip-cs-web
+        primary: True
+
+- name: Check if using image without Visual Studio
+  set_fact:
+    vmi_offer: "{{ vmi_novs_offer }}"
+    vmi_publisher: "{{ vmi_novs_publisher }}"
+    vmi_sku: "{{ vmi_novs_sku }}"
+  when: not image_has_visualstudio | bool
+
+- name: Check if using image with Visual Studio 2019
+  set_fact:
+    vmi_offer: "{{ vmi_vs2019_offer }}"
+    vmi_publisher: "{{ vmi_vs2019_publisher }}"
+    vmi_sku: "{{ vmi_vs2019_sku }}"
+  when: (image_has_visualstudio and vs_version == "2019")
+
+- name: Check if using image with Visual Studio 2017
+  set_fact:
+    vmi_offer: "{{ vmi_vs2017_offer }}"
+    vmi_publisher: "{{ vmi_vs2017_publisher }}"
+    vmi_sku: "{{ vmi_vs2017_sku }}"
+  when: (image_has_visualstudio and vs_version == "2017")
+
+- name: Create VM
+  azure_rm_virtualmachine:
+    resource_group: rg-cefbuild
+    name: vm-cs-web01
+    vm_size: "{{ azure_vm_size_setup }}"
+    admin_username: "{{ admin_user }}"
+    admin_password: "{{ admin_password }}"
+    network_interfaces: nic-cs-web
+    os_type: Windows
+    managed_disk_type: "{{ azure_managed_disk_type }}"
+    image:
+      offer: "{{ vmi_offer }}"
+      publisher: "{{ vmi_publisher }}"
+      sku: "{{ vmi_sku }}"
+      version: "{{ vmi_version }}"
+    data_disks:
+    - lun: 0
+      disk_size_gb: 250
+      storage_container_name: dsk-cs-web01
+      storage_blob_name: dsk-cs-web01.vhd
+      managed_disk_type: "{{ azure_managed_disk_type }}"
+  register: vm_data
+
+- name: Adding IP to build_vm
+  add_host: 
+    hostname: "{{ output_ip_address.state.ip_address }}"
+    groups: build_vm
+    admin_user: "{{ admin_user }}"
+    admin_password: "{{ admin_password }}"
+    image_has_visualstudio: "{{ image_has_visualstudio }}"
+    vs_edition: "{{ vs_edition }}"
+
+    ansible_connection: winrm
+    ansible_user: "{{ admin_user }}"
+    ansible_password: "{{ admin_password }}"
+    ansible_winrm_server_cert_validation: ignore
+    ansible_winrm_operation_timeout_sec: 120
+    ansible_winrm_read_timeout_sec: 150

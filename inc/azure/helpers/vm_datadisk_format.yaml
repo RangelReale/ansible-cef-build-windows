@@ -1,0 +1,14 @@
+- name: Initialize Disk
+  win_shell: "Initialize-Disk -Number {{ disk_format.number }}"
+
+- name: Create Partition using all available space
+  win_partition:
+    drive_letter: "M"
+    partition_size: -1
+    disk_number: "{{ disk_format.number }}"
+
+- name: Format the partition as NTFS and label it
+  win_format:
+    drive_letter: "M"
+    file_system: NTFS
+    new_label: Data
