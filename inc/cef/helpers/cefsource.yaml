@@ -1,8 +1,8 @@
 ---
 - name: Zip CEF source
-  win_command: '"C:\\Program Files\\7-Zip\\7z" a -t7z -m0=LZMA2:d64k:fb32 -ms=8m -mmt=30 -mx=1 -xr!binary_distrib -xr!*.git -xr!nacl_x86_* -- {{ azure_datadisk_drive }}:\\code\\cefsource_{{ cef_branch }}.7z {{ azure_datadisk_drive }}:\\code\\chromium_git'
+  win_command: '"C:\\Program Files\\7-Zip\\7z" a -t7z -m0=LZMA2:d64k:fb32 -ms=8m -mmt=30 -mx=1 -xr!binary_distrib -xr!*.git -xr!nacl_x86_* -- {{ azure_datadisk_drive }}:\\code\\cefsource_windows_{{ cef_branch }}.7z {{ azure_datadisk_drive }}:\\code\\chromium_git'
   args:
     chdir: "{{ azure_datadisk_drive }}:\\code"
-  register: zip_cef
+  # register: zip_cef
   # source directories gives warnings, and rc is 1 in these cases, must investigate
   # failed_when: zip_cef.rc != 0 and zip_cef.rc != 1
