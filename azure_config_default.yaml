@@ -5,6 +5,7 @@ image_has_visualstudio: true
 vs_edition: "Community"
 vs_version: "2019" # "2019" or "2017"
 azure_upload_distrib_blob: true
+azure_upload_source_blob: false
 
 ## Standard SSD
 # azure_vm_size_setup: "Standard_D2_v2"

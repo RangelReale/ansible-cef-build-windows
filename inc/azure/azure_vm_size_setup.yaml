@@ -1,0 +1,13 @@
+# Restart VM with build configuration
+- hosts: localhost
+  connection: local
+  tasks:
+  - include_vars: azure_vars.yaml
+  - name: "Check required variables"
+    fail: msg="Variable '{{ item }}' is not defined"
+    when: item not in vars
+    with_items: "{{azure_required_vars}}"
+  - name: Restart VM
+    include_tasks: helpers/vm_restart.yaml
+    vars:
+      restart_vm_size: "{{ azure_vm_size_setup }}"

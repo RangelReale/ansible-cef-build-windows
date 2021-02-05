@@ -12,12 +12,13 @@
 - name: Azure login
   win_shell: az login --service-principal --username {{ az_client_id }} --password {{ az_secret }} --tenant {{ az_tenant_id }}
 
-- name: Downloading binary files
+- name: Uploading binary files
   block:
   - name: Locating binary distrib files
     win_find: 
-      paths: m:\code\chromium_git\chromium\src\cef\binary_distrib
+      paths: "{{ azure_datadisk_drive }}:\\code\\chromium_git\\chromium\\src\\cef\\binary_distrib"
       recurse: no 
+      get_checksum: no
       patterns: "*.zip"
     register: binary_distrib_files
 
@@ -28,3 +29,23 @@
   - name: Uploading binary distrib files
     win_shell: az storage blob upload --file {{ item.path }} --container-name fl-cs-web01 --name vs{{ vs_version }}/{{ item.filename }} --account-name sacsweb01
     with_items: "{{ binary_distrib_files.files }}"
+ when: azure_upload_distrib_blob | bool
+
+- name: Uploading source
+  block:
+  - name: Locating source files
+    win_find: 
+      paths: "{{ azure_datadisk_drive }}:\\code"
+      recurse: no 
+      get_checksum: no
+      patterns: "cefsource_*.7z"
+    register: source_files
+
+  - ansible.builtin.debug: 
+      msg: 'filename: {{ item.filename }} -- path: {{ item.path }}'
+    with_items: "{{ source_files.files }}"
+
+  - name: Uploading source files
+    win_shell: az storage blob upload --file {{ item.path }} --container-name fl-cs-web01 --name vs{{ vs_version }}/{{ item.filename }} --account-name sacsweb01
+    with_items: "{{ source_files.files }}"
+  when: azure_upload_source_blob | bool

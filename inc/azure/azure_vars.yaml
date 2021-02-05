@@ -4,6 +4,8 @@ image_has_visualstudio: true
 vs_edition: "Community"
 # vs_version: "2019"
 azure_upload_distrib_blob: true
+azure_upload_source_blob: false
+azure_datadisk_drive: "m"
 
 ## Standard SSD
 # azure_vm_size_setup: "Standard_D2_v2"

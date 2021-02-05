@@ -20,12 +20,20 @@
         resource_group: rg-cefbuild
         storage_account_name: sacsweb01
         container: fl-cs-web01
-    when: azure_upload_distrib_blob | bool
+    - name: Restart VM in setup size if uploading source
+      include_tasks: helpers/vm_restart.yaml
+      vars:
+        restart_vm_size: "{{ azure_vm_size_setup }}"
+      when: azure_upload_source_blob | bool
+    when: azure_upload_distrib_blob or azure_upload_source_blob | bool
 
 # Download binary distrib
 - hosts: build_vm
   tasks:
   - include_vars: azure_vars.yaml
+  - name: Zip CEF source if uploading source
+    include_tasks: ../cef/helpers/cefsource.yaml
+    when: azure_upload_source_blob | bool
   - name: Upload binary distrib to blob storage
     include_tasks: helpers/cefdistrib.yaml
-    when: azure_upload_distrib_blob | bool
+    when: azure_upload_distrib_blob or azure_upload_source_blob | bool

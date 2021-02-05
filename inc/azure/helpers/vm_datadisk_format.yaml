@@ -9,6 +9,6 @@
 
 - name: Format the partition as NTFS and label it
   win_format:
-    drive_letter: "M"
+    drive_letter: "{{ azure_datadisk_drive }}"
     file_system: NTFS
     new_label: Data

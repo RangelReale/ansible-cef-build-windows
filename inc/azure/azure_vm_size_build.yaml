@@ -8,4 +8,6 @@
     when: item not in vars
     with_items: "{{azure_required_vars}}"
   - name: Restart VM
-    import_tasks: helpers/vm_restart.yaml
+    include_tasks: helpers/vm_restart.yaml
+    vars:
+      restart_vm_size: "{{ azure_vm_size_build }}"

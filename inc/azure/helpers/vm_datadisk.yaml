@@ -14,6 +14,6 @@
 
 - name: Create a file
   ansible.windows.win_copy:
-    dest: m:\cefbuild.txt
+    dest: "{{ azure_datadisk_drive }}:\\cefbuild.txt"
     content: |
       This disk will be used to build CEF.

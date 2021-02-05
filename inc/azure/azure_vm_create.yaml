@@ -21,6 +21,7 @@
 # Format and mount data disk
 - hosts: build_vm
   tasks:
+  - include_vars: azure_vars.yaml
   - name: Configure Windows
     include_tasks: helpers/vm_config.yaml
   - name: Configure data disk

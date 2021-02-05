@@ -5,26 +5,27 @@
 - name: Build release
   win_command: ninja -C out\Release_GN_x64 cef
   args:
-    chdir: m:\code\chromium_git\chromium\src
+    chdir: "{{ azure_datadisk_drive }}:\\code\\chromium_git\\chromium\\src"
   when: cef_build_release | bool
 
 - name: Build debug
   win_command: ninja -C out\Debug_GN_x64 cef
   args:
-    chdir: m:\code\chromium_git\chromium\src
+    chdir: "{{ azure_datadisk_drive }}:\\code\\chromium_git\\chromium\\src"
   when: cef_build_debug | bool
 
 - name: Build distrib
   win_command: make_distrib.bat --ninja-build --x64-build
   args:
-    chdir: m:\code\chromium_git\chromium\src\cef\tools
+    chdir: "{{ azure_datadisk_drive }}:\\code\\chromium_git\\chromium\\src\\cef\\tools"
 
 - name: Downloading binary files
   block:
   - name: Locating binary distrib files
     win_find: 
-      paths: m:\code\chromium_git\chromium\src\cef\binary_distrib
+      paths: "{{ azure_datadisk_drive }}:\\code\\chromium_git\\chromium\\src\\cef\\binary_distrib"
       recurse: no 
+      get_checksum: no
       patterns: "*.zip"
     register: binary_distrib_files
 

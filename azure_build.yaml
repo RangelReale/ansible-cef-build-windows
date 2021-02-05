@@ -13,7 +13,7 @@
 
 # Switch to compile VM (possibly more powerful)
 - name: "PLAYBOOK: Switch to compile VM"
-  import_playbook: inc/azure/azure_vm_build.yaml
+  import_playbook: inc/azure/azure_vm_size_build.yaml
 
 # Build CEF
 - name: "PLAYBOOK: Build CEF"

@@ -9,7 +9,7 @@
   azure_rm_virtualmachine:
     resource_group: rg-cefbuild
     name: vm-cs-web01
-    vm_size: "{{ azure_vm_size_build }}"
+    vm_size: "{{ restart_vm_size }}"
     started: true
 
 - name: Get facts for one Public IP
