@@ -29,7 +29,7 @@
   - name: Uploading binary distrib files
     win_shell: az storage blob upload --file {{ item.path }} --container-name fl-cs-web01 --name vs{{ vs_version }}/{{ item.filename }} --account-name sacsweb01
     with_items: "{{ binary_distrib_files.files }}"
- when: azure_upload_distrib_blob | bool
+  when: azure_upload_distrib_blob | bool
 
 - name: Uploading source
   block:
